@@ -8,7 +8,7 @@ let ecs        = new AWS.ECS()
 
 let screen = blessed.screen()
 
-let debugLog, infoBox
+let debugLog, infoBox, infoBoxMeta
 function servicesScreen(screen) {
 
     let grid = new contrib.grid({rows: 12, cols: 12, screen})
@@ -16,26 +16,21 @@ function servicesScreen(screen) {
     debugLog = grid.set(0, 9, 4, 3, contrib.log, {fg: 'green', selectedFg: 'green', label: 'Debug log'})
 
     let servicesTree = grid.set(0, 0, 4, 9, contrib.tree, {fg: 'green', label: 'Services', clickable: true})
-    let servicesTreeWorker = setInterval(() => repopulateServicesTree(servicesTree), 60000)
+    /*let servicesTreeWorker = */setInterval(() => repopulateServicesTree(servicesTree), 60000)
     repopulateServicesTree(servicesTree)
     servicesTree.focus()
 
     infoBox = grid.set(4, 0, 8, 12, blessed.box, {label: 'Info', clickable: true, scrollable: true,  alwaysScroll: true, scrollbar: {ch: ' ', inverse: true}, keys: true})
 
-    // servicesTree.setData()
-
-    let infoBoxMeta = {}
     servicesTree.on('select',function(node){
         if (node.arn && node.isService === true) {
             populateInfoBoxWithService(node.arn, node.parent.arn, infoBox)
         }
     })
 
-    // servicesTree.on('key', (key) => console.log(key))
-
-    screen.key(['s', 'S'], (ch, key) => {
-    debugLog.log('Focussing on services tree...')
-    servicesTree.focus()
+    screen.key(['s', 'S'], () => {
+        debugLog.log('Focussing on services tree...')
+        servicesTree.focus()
     })
 
     screen.render()
@@ -69,14 +64,14 @@ async function tableScreen(screen) {
     let tableReference = []
 
     let data = []
-    for(clusterArn of await listClusters()) {
+    for(const clusterArn of await listClusters()) {
         let servicesToDescribe = []
-        for(serviceArn of await getServicesOfCluster(clusterArn)) {
+        for(const serviceArn of await getServicesOfCluster(clusterArn)) {
             servicesToDescribe.push(serviceArn)
         }
 
         table.setLabel(`Loading ${clusterArn}`) && screen.render()
-        for(service of await describeServices(servicesToDescribe, clusterArn)) {
+        for(const service of await describeServices(servicesToDescribe, clusterArn)) {
             data.push([
                 service.status,
                 service.serviceName,
@@ -108,19 +103,19 @@ async function tableScreen(screen) {
         taskInfos = []
 
         tasks = await getTasksOfService(service.serviceArn, service.clusterArn)
-        for(task in tasks) {
+        for(const task in tasks) {
             let ti = await taskInfo(tasks[task], service.clusterArn)
             taskInfos.push(ti)
         }
 
         contentToSet += 'Container instances: \n'
-        for(task in tasks) {
+        for(const task in tasks) {
             contentToSet += `[${Number(task)+1}] ${taskInfos[task].containerInstanceArn}\n`
             contentToSet += `${prettyjson.render(await containerInstanceInfo(taskInfos[task].containerInstanceArn, service.clusterArn))}\n\n\n\n`
         }
 
         contentToSet += 'Tasks: \n'
-        for(task in tasks) {
+        for(const task in tasks) {
             contentToSet += `[${Number(task)+1}] ${tasks[task]}\n`
             contentToSet += `${prettyjson.render(taskInfos[task])}\n\n\n\n`
         }
@@ -129,7 +124,7 @@ async function tableScreen(screen) {
         serviceInfoBox.setContent(contentToSet)
 
         let eventList = service.events.reverse().slice(service.events.length - 50)
-        for(event of eventList) {
+        for(const event of eventList) {
             eventLog.log(`${moment(event.createdAt).format('DD-MMM HH:mm:ss')}`)
             eventLog.log(`${event.message}`)
         }
@@ -144,7 +139,7 @@ async function tableScreen(screen) {
     // })
 }
 
-screen.key(['t', 'T'], (ch, key) => {
+screen.key(['t', 'T'], () => {
     if(infoBoxMeta && infoBox) {
         if(infoBoxMeta.type === 'service') {
             populateInfoBoxWithTaskDefinition(infoBoxMeta.taskDefinitionARN)
@@ -154,9 +149,9 @@ screen.key(['t', 'T'], (ch, key) => {
         }
     }
 })
-screen.key(['escape', 'q', 'C-c'], (ch, key) => process.exit(0))
-screen.key([']'], (ch, key) => carousel.next())
-screen.key(['['], (ch, key) => carousel.prev())
+screen.key(['escape', 'q', 'C-c'], () => process.exit(0))
+screen.key([']'], () => carousel.next())
+screen.key(['['], () => carousel.prev())
 
 let carousel = new contrib.carousel([servicesScreen, tableScreen], {
     screen,
@@ -185,9 +180,6 @@ async function containerInstanceInfo(containerInstance, cluster) {
 }
 
 
-
-let clusters = []
-
 async function repopulateServicesTree(servicesTree) {
     debugLog.log('Repopulating Services tree...')
 
@@ -195,7 +187,7 @@ async function repopulateServicesTree(servicesTree) {
 
     let clusterList = await listClusters().catch(err => debugLog.log(err.message))
 
-    for(cluster of clusterList) {
+    for(const cluster of clusterList) {
         let clusterARN = cluster
         let clusterName = cluster.replace('arn:aws:ecs:eu-west-1:243865322197:', '')
 
@@ -205,7 +197,7 @@ async function repopulateServicesTree(servicesTree) {
 
         tree.children[clusterName] = {arn: clusterARN, children: {}}
 
-        for(service of clusterServices) {
+        for(const service of clusterServices) {
             let serviceARN = service
             let serviceName = service.replace('arn:aws:ecs:eu-west-1:243865322197:', '')
 

@@ -18,5 +18,8 @@
     "prettyjson": "^1.2.1",
     "snyk": "^1.30.0"
   },
-  "snyk": true
+  "snyk": true,
+  "devDependencies": {
+    "eslint": "^3.19.0"
+  }
 }

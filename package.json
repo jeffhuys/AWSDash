@@ -13,7 +13,7 @@
   "dependencies": {
     "aws-sdk": "^2.41.0",
     "blessed": "^0.1.81",
-    "blessed-contrib": "^4.7.5",
+    "blessed-contrib": "git@github.com:jeffhuys/blessed-contrib.git",
     "moment": "^2.18.1",
     "prettyjson": "^1.2.1",
     "snyk": "^1.30.0"

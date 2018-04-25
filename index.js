@@ -8,7 +8,8 @@ let ecs        = new AWS.ECS()
 
 let screen = blessed.screen()
 
-let debugLog, infoBox, infoBoxMeta
+let debugLog, infoBox, infoBoxMeta, serviceInfoBox
+
 function servicesScreen(screen) {
 
     let grid = new contrib.grid({rows: 12, cols: 12, screen})
@@ -55,7 +56,7 @@ async function tableScreen(screen) {
         columnWidth: [8, 32, 16, 38, 8]
     })
 
-    let serviceInfoBox = grid.set(6, 0, 6, 8, blessed.box, {label: 'Info', clickable: true, scrollable: true,  alwaysScroll: true, scrollbar: {ch: ' ', inverse: true}, keys: true})
+    serviceInfoBox = grid.set(6, 0, 6, 8, blessed.box, {label: 'Info', clickable: true, scrollable: true,  alwaysScroll: true, scrollbar: {ch: ' ', inverse: true}, keys: true})
     let eventLog = grid.set(6, 8, 6, 4, contrib.log, {fg: 'green', selectedFg: 'green', label: 'Events'})
 
     table.setLabel('#### LOADING ####')
@@ -121,7 +122,7 @@ async function tableScreen(screen) {
         }
 
 
-        serviceInfoBox.setContent(contentToSet)
+        infoBox.setContent(contentToSet)
 
         let eventList = service.events.reverse().slice(service.events.length - 50)
         for(const event of eventList) {

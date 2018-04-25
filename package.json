@@ -4,7 +4,8 @@
   "description": "Terminal-based dashboard for Amazon Web Services",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index"
   },
   "author": "Jeff Huijsmans <jeffhuys@gmail.com>",
   "license": "ISC",
